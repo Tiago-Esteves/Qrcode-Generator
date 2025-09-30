@@ -41,7 +41,7 @@ public class QrCodeGeneratorService {
         MatrixToImageWriter.writeToStream(bitMatrix,"PNG", pngOutputStream);
         byte[] pngQrCodeData = pngOutputStream.toByteArray();
 
-        String url = storage.uploadFile(pngQrCodeData, UUID.randomUUID().toString(), "image/png");
+        String url = storagePort.uploadFile(pngQrCodeData, UUID.randomUUID().toString(), "image/png");
 
         return new QrCodeGenerateResponse(url);
     }

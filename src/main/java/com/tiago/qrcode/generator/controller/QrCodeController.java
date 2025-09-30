@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 @RestController
 @RequestMapping("/qrcode")
@@ -33,8 +34,22 @@ public class QrCodeController {
         try {
             QrCodeGenerateResponse response = this.qrCodeGeneratorService.generateAndUploadQrCode(request.text());
             return ResponseEntity.ok(response);
+        } catch (SdkClientException e) {
+            System.err.println("Erro ao carregar credenciais AWS: " + e.getMessage());
+
+            if (e.getMessage().contains("ProfileCredentialsProvider")) {
+                System.err.println("Verifique se o perfil AWS especificado existe em ~/.aws/credentials e possui AccessKey/SecretKey.");
+            }
+            if (e.getMessage().contains("EnvironmentVariableCredentialsProvider")) {
+                System.err.println("Verifique se as variáveis de ambiente AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY estão setadas corretamente.");
+            }
+
+            return ResponseEntity.internalServerError().build();
         } catch (Exception e) {
+            // outros erros genéricos
+            System.err.println("Erro inesperado: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
+
     }
 }
